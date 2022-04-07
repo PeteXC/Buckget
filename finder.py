@@ -40,7 +40,9 @@ def concat_files(outfilename, prefix):
             with open(filename, 'rb') as readfile:
                 if readfile.readable():
                     shutil.copyfileobj(readfile, outfile)
-                    print(f"Added {readfile.name} to {outfilename}")
+
+#TODO: Grep using parameter
+#def grep_for():
 
 @click.command()
 @click.argument("bucket")
@@ -53,13 +55,13 @@ def run(bucket, prefix, grep):
     bucketS3 = resource.Bucket(bucket)
     object_count = sum(1 for _ in bucketS3.objects.all())
 
-    with yaspin(Spinners.aesthetic, text="Downloading logs") as spinner:
+    with yaspin(Spinners.aesthetic, text="Downloading logs...") as spinner:
         download_dir(client, resource, prefix, spinner, object_count, bucket, local='logs')
         spinner.ok("✅ Logs downloaded!")
 
     outfilename = 'all_' + str((int(time.time())))
 
-    with yaspin(Spinners.aesthetic, text="Creating master log") as spinner:
+    with yaspin(Spinners.aesthetic, text="Creating master log...") as spinner:
         concat_files(outfilename, prefix)
         spinner.ok(f"✅ Logs are at {outfilename}!!!")
 
