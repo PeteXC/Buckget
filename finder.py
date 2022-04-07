@@ -8,21 +8,25 @@ from datetime import datetime
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
+counter = 1
+
 # Recursive download for S3 buckets from
 # https://stackoverflow.com/questions/31918960/boto3-to-download-all-files-from-a-s3-bucket
 def download_dir(client, resource, dist, sp, total_num, bucket, local='logs'):
+    global counter
     paginator = client.get_paginator('list_objects')
     for result in paginator.paginate(Bucket=bucket, Delimiter='/', Prefix=dist):
         if result.get('CommonPrefixes') is not None:
             for subdir in result.get('CommonPrefixes'):
                 download_dir(client, resource, subdir.get('Prefix'), sp, total_num, bucket, local)
-        for idx, file in enumerate(result.get('Contents', [])):
+        for file in result.get('Contents', []):
             dest_pathname = os.path.join(local, file.get('Key'))
             if not os.path.exists(os.path.dirname(dest_pathname)):
                 os.makedirs(os.path.dirname(dest_pathname))
             if not file.get('Key').endswith('/'):
                 resource.meta.client.download_file(bucket, file.get('Key'), dest_pathname)
-                sp.write(f"> Downloaded file {idx} of {total_num}")
+                sp.write(f"> Downloaded file {counter} of {total_num}")
+                counter += 1
 
 def concat_files(outfilename, prefix):
     with open(outfilename, 'wb') as outfile:
