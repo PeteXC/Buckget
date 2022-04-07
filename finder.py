@@ -51,7 +51,6 @@ def run(bucket, prefix, grep):
 
     with yaspin(Spinners.aesthetic, text="Downloading logs") as spinner:
         download_dir(client, resource, prefix, spinner, object_count, bucket, local='logs')
-        time.sleep(3)
         spinner.ok("✅ Logs downloaded!")
 
     outfilename = 'all_' + str((int(time.time())))
