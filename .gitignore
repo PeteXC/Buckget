@@ -1,3 +1,7 @@
 logs
 .DS_STORE
 all_*
+
+# Zips
+*.tar.gz
+*.zip
