@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 import glob
+import gzip
 import click
 import json
 from datetime import datetime
@@ -24,10 +25,13 @@ def download_dir(client, resource, dist, sp, total_num, bucket, local="logs"):
                 )
         for file in result.get("Contents", []):
             dest_pathname = os.path.join(local, file.get("Key"))
+            if os.path.exists(dest_pathname):
+                sp.write(f"> Already have file at {dest_pathname}")
+                continue
             if not os.path.exists(os.path.dirname(dest_pathname)):
                 os.makedirs(os.path.dirname(dest_pathname))
             if not file.get("Key").endswith("/"):
-                # if not file.
+                # if not folder
                 resource.meta.client.download_file(
                     bucket, file.get("Key"), dest_pathname
                 )
@@ -48,7 +52,6 @@ def concat_files(outfilename, prefix):
                 if readfile.readable():
                     shutil.copyfileobj(readfile, outfile)
 
-
 # TODO: Grep using parameter
 # def grep_for():
 
@@ -62,13 +65,16 @@ def time_range(filename, new_file_name, from_time, to_time):
                 if from_time <= time <= to_time:
                     output.write(line)
 
-
 # with open("yourfile.txt", "r") as file_input:
 #     with open("newfile.txt", "w") as output:
 #         for line in file_input:
 #             if line.strip("\n") != "nickname_to_delete":
 #                 output.write(line)
 
+def compress(in_file_name):
+    with open(in_file_name, 'rb') as f_in:
+        with gzip.open(f"{in_file_name}.gz", 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
 @click.command()
 @click.argument("bucket")
@@ -85,23 +91,27 @@ def run(bucket, prefix, grep):
     bucketS3 = resource.Bucket(bucket)
     object_count = sum(1 for _ in bucketS3.objects.all())
 
-    with yaspin(Spinners.aesthetic, text="Downloading logs...") as spinner:
+    with yaspin(Spinners.dots, text="Downloading logs") as spinner:
         download_dir(
             client, resource, prefix, spinner, object_count, bucket, local="logs"
         )
-        spinner.ok("✅ Logs downloaded!")
+        spinner.ok("✅")
 
     outfilename = "all_" + str((int(time.time())))
 
-    with yaspin(Spinners.aesthetic, text="Creating unified log...") as spinner:
+    with yaspin(Spinners.dots, text="Creating unified log") as spinner:
         concat_files(outfilename, prefix)
-        spinner.ok(f"✅ Logs are at {outfilename}!!!")
+        spinner.ok(f"✅")
 
-    with yaspin(Spinners.aesthetic, text="Creating condensed log...") as spinner:
-        time_range(outfilename, "condensed_logs", from_time, to_time)(
-            outfilename, prefix
-        )
-        spinner.ok(f"✅ Logs are at {outfilename}!!!")
+    compress(outfilename)
+
+    # with yaspin(Spinners.dots, text="Creating condensed log") as spinner:
+    #     time_range(outfilename, "condensed_logs", from_time, to_time)(
+    #         outfilename, prefix
+    #     )
+    #     spinner.ok(f"✅ Logs are at {outfilename}!!!")
+
+    yaspin().write(f"😄 Logs are at {outfilename}!!!")
 
 
 # Example usage:
