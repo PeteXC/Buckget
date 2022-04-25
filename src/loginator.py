@@ -16,6 +16,7 @@ counter = 1
 # https://stackoverflow.com/questions/31918960/boto3-to-download-all-files-from-a-s3-bucket
 def download_dir(client, resource, dist, sp, total_num, bucket, local="logs"):
     global counter
+    local = local + "/" + bucket
     paginator = client.get_paginator("list_objects")
     for result in paginator.paginate(Bucket=bucket, Delimiter="/", Prefix=dist):
         if result.get("CommonPrefixes") is not None:
@@ -39,15 +40,21 @@ def download_dir(client, resource, dist, sp, total_num, bucket, local="logs"):
                 counter += 1
 
 
-def concat_files(outfilename, prefix):
+def concat_files(outfilename, bucket, prefix):
     with open(outfilename, "wb") as outfile:
-        for filename in glob.glob(pathname="logs/" + prefix + "/**", recursive=True):
+        for filename in glob.glob(pathname="logs/" + bucket + "/" + prefix + "/**", recursive=True):
             if filename == outfilename:
                 # don't want to copy the output into the output
                 continue
             if os.path.isdir(filename):
                 # ignore directories
                 continue
+            if filename.endswith(".gz"):
+                # check if we need to unzip
+                with gzip.open(filename,"rb") as readfile:
+                    if readfile.readable():
+                        shutil.copyfileobj(readfile, outfile)
+                        continue
             with open(filename, "rb") as readfile:
                 if readfile.readable():
                     shutil.copyfileobj(readfile, outfile)
@@ -72,8 +79,8 @@ def time_range(filename, new_file_name, from_time, to_time):
 #                 output.write(line)
 
 def compress(in_file_name):
-    with open(in_file_name, 'rb') as f_in:
-        with gzip.open(f"{in_file_name}.gz", 'wb') as f_out:
+    with open(in_file_name, "rb") as f_in:
+        with gzip.open(f"{in_file_name}.gz", "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
 
 @click.command()
@@ -100,7 +107,7 @@ def run(bucket, prefix, grep):
     outfilename = "all_" + str((int(time.time())))
 
     with yaspin(Spinners.dots, text="Creating unified log") as spinner:
-        concat_files(outfilename, prefix)
+        concat_files(outfilename, bucket, prefix)
         spinner.ok(f"✅")
 
     compress(outfilename)
@@ -115,6 +122,5 @@ def run(bucket, prefix, grep):
 
 
 # Example usage:
-# python3 finder.py wafstack-waflogsf9f75746-z1g8cih4ao88 --prefix=2022/04/07
 if __name__ == "__main__":
     run()
