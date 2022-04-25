@@ -1,5 +1,5 @@
-# Buckget
- This is a tool that will help you extract logs stored in S3
+# Loginator
+ This is a rudimentary tool that will help you extract logs or other files stored in S3
 
  ## Installation
 

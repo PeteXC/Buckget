@@ -6,3 +6,8 @@ all_*
 # Zips
 *.tar.gz
 *.zip
+*.xz
+*.gz
+
+# dotfiles
+.vscode
