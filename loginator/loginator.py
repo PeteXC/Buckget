@@ -160,7 +160,5 @@ def run(bucket, prefix, grep, out):
 
     yaspin().write(f"😄 Logs are at {outfilename}!!!")
 
-
-# Example usage:
 if __name__ == "__main__":
     run()
