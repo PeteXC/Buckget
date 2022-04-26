@@ -120,7 +120,7 @@ def compress(in_file_name, alg):
     version=metadata.__version__,
     prog_name=metadata.__name__,
     package_name=metadata.__package__,
-    message="%(prog)s %(version)s"
+    message="%(version)s"
 )
 @click.option("--grep", default=None, help="Grep for specific parts of log")
 def run(bucket, prefix, grep, out):
