@@ -12,6 +12,8 @@ from datetime import datetime
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
+import __init__ as metadata
+
 counter = 1
 
 # Recursive download for S3 buckets from
@@ -114,6 +116,12 @@ def compress(in_file_name, alg):
     Compression allowed - zip, gz, xz
     """,
 )
+@click.version_option(
+    version=metadata.__version__,
+    prog_name=metadata.__name__,
+    package_name=metadata.__package__,
+    message="%(prog)s %(version)s"
+)
 @click.option("--grep", default=None, help="Grep for specific parts of log")
 def run(bucket, prefix, grep, out):
     client = boto3.client("s3")
@@ -159,6 +167,7 @@ def run(bucket, prefix, grep, out):
     #     spinner.ok(f"✅ Logs are at {outfilename}!!!")
 
     yaspin().write(f"😄 Logs are at {outfilename}!!!")
+
 
 if __name__ == "__main__":
     run()
