@@ -2,6 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 from io import open
 from os import path
+import os
 import loginator
 
 import pathlib
@@ -14,13 +15,15 @@ README = (HERE / "README.md").read_text()
 
 ### REQUIREMENTS ###
 # automatically captured required modules for install_requires in requirements.txt
-with open(path.join(HERE, "requirements.txt"), encoding="utf-8") as f:
-    all_reqs = f.read().split("\n")
+if path.exists(path.join(HERE, "requirements.txt")):
+    with open(path.join(HERE, "requirements.txt"), encoding="utf-8") as f:
+        all_reqs = f.read().split("\n")
+else:
+    with open(path.join(HERE, "loginator.egg-info/requires.txt"), encoding="utf-8") as f:
+        all_reqs = f.read().split("\n")
 
 INSTALL_REQUIRES = [
-    x.strip()
-    for x in all_reqs
-    if ("git+" not in x) and (not x.startswith("#")) and (not x.startswith("-"))
+    x.strip() for x in all_reqs if ("git+" not in x) and (not x.startswith("#")) and (not x.startswith("-"))
 ]
 dependency_links = [x.strip().replace("git+", "") for x in all_reqs if "git+" not in x]
 
@@ -37,6 +40,7 @@ setup(
     long_description=readme(),
     long_description_content_type="text/markdown",
     keywords="logs aws loginator aws-s3 s3 bucket",
+    options={"bdist_wheel": {"universal": True}},
     url="https://github.com/PeteXC/Loginator",
     classifiers=[
         "Programming Language :: Python :: 3.6",
