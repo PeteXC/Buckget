@@ -1,8 +1,9 @@
+#!usr/bin/env python
+#__init__.py
 """
 Loginator
 """
-
 __name__ = "loginator"
-__version__ = "0.0.13"
+__package__ = "loginator"
 __author__ = "Peter Chai"
 __credits__ = "Peter Chai"

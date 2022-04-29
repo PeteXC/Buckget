@@ -4,7 +4,6 @@ from io import open
 from os import path
 import os
 import loginator
-
 import pathlib
 
 # The directory containing this file
@@ -32,9 +31,9 @@ def readme():
         return f.read()
 
 setup(
-    name=loginator.__name__,
-    version=loginator.__version__,
-    author=loginator.__author__,
+    name="loginator",
+    version="0.0.16",
+    author="Peter Chai",
     author_email="peterchai2008@hotmail.co.uk",
     description="A rudimentary command line tool to help you download logs and other files from S3",
     long_description=readme(),
@@ -49,6 +48,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(),
+    package_data={'': ['requirements.txt', ]},
+    include_package_data=True,
     entry_points={
         "console_scripts": ["loginator=loginator.loginator:run"],
     },
