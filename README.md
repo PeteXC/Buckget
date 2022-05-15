@@ -1,5 +1,7 @@
 # Loginator
  This is a rudimentary tool that will help you extract logs or other files stored in S3
+ 
+ PyPi project [here](https://pypi.org/project/loginator/)
 
  ## Installation
 
